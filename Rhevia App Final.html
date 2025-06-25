@@ -1,0 +1,2735 @@
+<!DOCTYPE html>
+<!-- Add this at the top of your main app -->
+<script>
+  // Check authentication on app load
+  if (sessionStorage.getItem('isAuthenticated') !== 'true') {
+    window.location.href = "login.html";
+  }
+</script>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rhevia Perfumes Accounting System</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #9c27b0;
+      --primary-dark: #7b1fa2;
+      --accent: #e1bee7;
+      --success: #4caf50;
+      --warning: #ff9800;
+      --danger: #f44336;
+      --light: #f4f7fa;
+      --dark: #333;
+      --gray: #666;
+      --light-gray: #ddd;
+      --white: #fff;
+      --card-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      --transition: all 0.3s ease;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--light);
+      color: var(--dark);
+      line-height: 1.6;
+      padding: 10px;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4e7f1 100%);
+    }
+    
+    .container {
+      display: flex;
+      min-height: 100vh;
+      max-width: 1800px;
+      margin: 0 auto;
+      box-shadow: 0 0 25px rgba(0,0,0,0.1);
+      border-radius: 15px;
+      overflow: hidden;
+      background: white;
+    }
+    
+    /* Sidebar */
+    .sidebar {
+      width: 240px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: var(--white);
+      padding: 25px 15px;
+      position: relative;
+      z-index: 10;
+      transition: all 0.4s;
+    }
+    
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      margin-bottom: 40px;
+    }
+    
+    .logo {
+      width: 50px;
+      height: 50px;
+      background: var(--white);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 15px;
+    }
+    
+    .logo i {
+      font-size: 24px;
+      color: var(--primary);
+    }
+    
+    .sidebar h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+    
+    .sidebar a {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin: 12px 0;
+      color: rgba(255, 255, 255, 0.85);
+      text-decoration: none;
+      padding: 12px 15px;
+      border-radius: 10px;
+      transition: var(--transition);
+      font-size: 1.05rem;
+    }
+    
+    .sidebar a:hover,
+    .sidebar a.active {
+      color: var(--white);
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateX(5px);
+    }
+    
+    /* Main Content */
+    .main {
+      flex: 1;
+      padding: 30px;
+      background: var(--white);
+      overflow-y: auto;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid var(--light-gray);
+    }
+    
+    .header h1 {
+      font-size: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      color: var(--primary);
+    }
+    
+    /* Card Styles */
+    .card {
+      background: var(--white);
+      border-radius: 15px;
+      box-shadow: var(--card-shadow);
+      padding: 30px;
+      margin-bottom: 35px;
+      border: 1px solid #eee;
+    }
+    
+    .card h2 {
+      font-size: 1.5rem;
+      margin-bottom: 25px;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid var(--light-gray);
+    }
+    
+    /* Summary Cards */
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 25px;
+      margin-bottom: 35px;
+    }
+    
+    .summary-card {
+      background: linear-gradient(to bottom right, #f8f9ff, #f0f2ff);
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: var(--card-shadow);
+      transition: transform 0.3s, box-shadow 0.3s;
+      border: 1px solid #eef0ff;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .summary-card:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 80px;
+      height: 80px;
+      background: rgba(156, 39, 176, 0.08);
+      border-radius: 0 0 0 100%;
+    }
+    
+    .summary-card:hover {
+      transform: translateY(-7px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    
+    .summary-card h3 {
+      font-size: 1.1rem;
+      color: var(--gray);
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .summary-card p {
+      font-size: 2.2rem;
+      font-weight: 700;
+    }
+    
+    .income { color: var(--success); }
+    .expense { color: var(--danger); }
+    
+    /* Filters */
+    .filters {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .filter-group label {
+      font-size: 0.9rem;
+      margin-bottom: 5px;
+      color: var(--gray);
+      font-weight: 500;
+    }
+    
+    .filters input,
+    .filters select {
+      padding: 12px 15px;
+      font-size: 1rem;
+      border-radius: 10px;
+      border: 1px solid var(--light-gray);
+      background: var(--white);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      min-width: 180px;
+    }
+    
+    .filters button {
+      padding: 12px 20px;
+      background: var(--primary);
+      color: var(--white);
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 8px rgba(156, 39, 176, 0.3);
+      margin-top: 22px;
+    }
+    
+    .filters button:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+    
+    /* Table Styles */
+    .table-container {
+      overflow-x: auto;
+      border-radius: 15px;
+      box-shadow: var(--card-shadow);
+      background: var(--white);
+      padding: 5px;
+      border: 1px solid #eee;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 1rem;
+    }
+    
+    th, td {
+      padding: 15px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--light-gray);
+    }
+    
+    th {
+      background: #f8f9ff;
+      font-weight: 600;
+      color: var(--primary);
+      position: sticky;
+      top: 0;
+    }
+    
+    tbody tr {
+      transition: background 0.2s;
+      cursor: pointer;
+    }
+    
+    tbody tr:hover {
+      background-color: #f8f9ff;
+    }
+    
+    /* Badges */
+    .badge {
+      padding: 6px 14px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      color: var(--white);
+      display: inline-block;
+      font-weight: 500;
+    }
+    
+    .paid { background-color: var(--success); }
+    .unpaid { background-color: var(--warning); }
+    .overdue { background-color: var(--danger); }
+    
+    /* Status badges */
+    .status-badge {
+      padding: 7px 14px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      display: inline-block;
+      margin-right: 8px;
+      margin-bottom: 5px;
+    }
+    
+    .status-paid {
+      background: rgba(76, 175, 80, 0.15);
+      color: var(--success);
+    }
+    
+    .status-pending {
+      background: rgba(255, 152, 0, 0.15);
+      color: var(--warning);
+    }
+    
+    .status-overdue {
+      background: rgba(244, 67, 54, 0.15);
+      color: var(--danger);
+    }
+    
+    .status-delivered {
+      background: rgba(63, 81, 181, 0.15);
+      color: #3f51b5;
+    }
+    
+    .status-processing {
+      background: rgba(33, 150, 243, 0.15);
+      color: #2196f3;
+    }
+    
+    /* Buttons */
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 15px;
+    }
+    
+    .btn {
+      padding: 13px 25px;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .btn-primary {
+      background: var(--primary);
+      color: var(--white);
+    }
+    
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 12px rgba(156, 39, 176, 0.3);
+    }
+    
+    .btn-secondary {
+      background: #f0f2f7;
+      color: #555;
+    }
+    
+    .btn-secondary:hover {
+      background: #e4e7ed;
+      transform: translateY(-3px);
+    }
+    
+    .btn-success {
+      background: var(--success);
+      color: var(--white);
+    }
+    
+    .btn-success:hover {
+      background: #3d8b40;
+      transform: translateY(-3px);
+    }
+    
+    .btn-export {
+      background: #2196f3;
+      color: var(--white);
+    }
+    
+    .btn-export:hover {
+      background: #0b7dda;
+      transform: translateY(-3px);
+    }
+    
+    /* Form Elements */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 25px;
+      margin-bottom: 30px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--gray);
+      font-size: 1.05rem;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 14px 18px;
+      border: 1px solid var(--light-gray);
+      border-radius: 10px;
+      font-size: 1.05rem;
+      transition: var(--transition);
+      background: #fcfcff;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(225, 190, 231, 0.3);
+      background: #fff;
+    }
+    
+    .form-group textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+    
+    /* Navigation Tabs */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--light-gray);
+      margin-bottom: 25px;
+    }
+    
+    .tab {
+      padding: 15px 25px;
+      cursor: pointer;
+      transition: var(--transition);
+      border-bottom: 3px solid transparent;
+      font-weight: 500;
+      font-size: 1.1rem;
+    }
+    
+    .tab.active {
+      border-bottom: 3px solid var(--primary);
+      color: var(--primary);
+      font-weight: 600;
+    }
+    
+    .tab:hover:not(.active) {
+      background: #f8f9fc;
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 50px 30px;
+      color: var(--gray);
+    }
+    
+    .empty-state i {
+      font-size: 4rem;
+      margin-bottom: 25px;
+      color: #dde0e8;
+    }
+    
+    .empty-state h3 {
+      font-size: 1.8rem;
+      margin-bottom: 15px;
+      color: var(--primary);
+    }
+    
+    .empty-state p {
+      font-size: 1.1rem;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    
+    .taka {
+      font-family: Arial, sans-serif;
+    }
+    
+    .action-btn {
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 1.1rem;
+      margin: 0 3px;
+    }
+    
+    .view-btn {
+      background: rgba(33, 150, 243, 0.15);
+      color: #2196f3;
+    }
+    
+    .edit-btn {
+      background: rgba(255, 193, 7, 0.15);
+      color: #ffc107;
+    }
+    
+    .delete-btn {
+      background: rgba(244, 67, 54, 0.15);
+      color: #f44336;
+    }
+    
+    .action-btn:hover {
+      transform: scale(1.1);
+    }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .modal-content {
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      width: 90%;
+      max-width: 700px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .modal-header h2 {
+      color: var(--primary);
+      font-size: 1.8rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .close-modal {
+      background: none;
+      border: none;
+      font-size: 1.8rem;
+      cursor: pointer;
+      color: #777;
+      transition: all 0.3s;
+    }
+    
+    .close-modal:hover {
+      color: var(--danger);
+    }
+    
+    .modal-body {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    
+    .detail-group {
+      margin-bottom: 20px;
+    }
+    
+    .detail-group h3 {
+      color: var(--primary);
+      margin-bottom: 8px;
+      font-size: 1.1rem;
+    }
+    
+    .detail-group p {
+      background: #f8f9ff;
+      padding: 12px 15px;
+      border-radius: 8px;
+      font-size: 1.1rem;
+    }
+    
+    /* Invoice Template */
+    .invoice-modal-content {
+      background: white;
+      border-radius: 15px;
+      padding: 40px;
+      width: 90%;
+      max-width: 800px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    
+    .invoice-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 30px;
+    }
+    
+    .invoice-logo {
+      font-size: 24px;
+      font-weight: bold;
+      color: var(--primary);
+    }
+    
+    .invoice-title {
+      font-size: 28px;
+      font-weight: bold;
+      color: var(--primary);
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .invoice-info {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 30px;
+    }
+    
+    .invoice-info-section {
+      flex: 1;
+    }
+    
+    .invoice-info-section h3 {
+      margin-bottom: 10px;
+      color: var(--primary);
+      border-bottom: 2px solid var(--light-gray);
+      padding-bottom: 5px;
+    }
+    
+    .invoice-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 30px;
+    }
+    
+    .invoice-table th {
+      background: var(--primary);
+      color: white;
+      padding: 12px 15px;
+      text-align: left;
+    }
+    
+    .invoice-table td {
+      padding: 12px 15px;
+      border-bottom: 1px solid var(--light-gray);
+    }
+    
+    .invoice-table tr:nth-child(even) {
+      background: #f9f9f9;
+    }
+    
+    .invoice-totals {
+      width: 100%;
+      max-width: 300px;
+      margin-left: auto;
+      margin-bottom: 30px;
+    }
+    
+    .invoice-totals-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--light-gray);
+    }
+    
+    .invoice-totals-row.total {
+      font-weight: bold;
+      font-size: 1.1rem;
+      border-top: 2px solid var(--primary);
+      margin-top: 5px;
+      padding-top: 10px;
+    }
+    
+    .invoice-footer {
+      margin-top: 40px;
+      text-align: center;
+      color: var(--gray);
+      font-size: 0.9rem;
+    }
+    
+    .invoice-actions {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 20px;
+    }
+    
+    /* Transaction Modal */
+    .transaction-modal-content {
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      width: 90%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    
+    .transaction-form {
+      display: grid;
+      gap: 20px;
+    }
+    
+    .transaction-form .form-group {
+      margin-bottom: 0;
+    }
+    
+    .transaction-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 15px;
+      margin-top: 20px;
+    }
+    
+    /* Toast notification */
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 25px;
+      border-radius: 10px;
+      background: var(--success);
+      color: white;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 2000;
+      transform: translateX(120%);
+      transition: transform 0.3s ease;
+    }
+    
+    .toast.show {
+      transform: translateX(0);
+    }
+    
+    .toast.error {
+      background: var(--danger);
+    }
+    
+    .toast.info {
+      background: var(--primary);
+    }
+    
+    .toast.warning {
+      background: var(--warning);
+    }
+    
+    /* Data Backup Section */
+    .backup-section {
+      background: #f8f9ff;
+      border-radius: 15px;
+      padding: 25px;
+      margin-top: 30px;
+      border: 1px solid #e0e0ff;
+    }
+    
+    .backup-section h3 {
+      color: var(--primary);
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .backup-buttons {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 1200px) {
+      .sidebar {
+        width: 70px;
+      }
+      
+      .sidebar-header span,
+      .sidebar a span {
+        display: none;
+      }
+      
+      .sidebar:hover {
+        width: 240px;
+      }
+      
+      .sidebar:hover .sidebar-header span,
+      .sidebar:hover a span {
+        display: inline;
+      }
+    }
+    
+    @media (max-width: 992px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .container {
+        flex-direction: column;
+      }
+      
+      .sidebar {
+        width: 100%;
+        height: auto;
+        padding: 15px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+      }
+      
+      .sidebar-header {
+        width: 100%;
+        margin-bottom: 15px;
+      }
+      
+      .sidebar a {
+        margin: 5px;
+        padding: 10px;
+        font-size: 0.95rem;
+      }
+      
+      .main {
+        margin-left: 0;
+        padding: 20px;
+      }
+      
+      .summary {
+        grid-template-columns: 1fr;
+      }
+      
+      .btn-group {
+        flex-direction: column;
+      }
+      
+      .filters {
+        flex-direction: column;
+      }
+      
+      .filters input,
+      .filters select {
+        width: 100%;
+      }
+      
+      .invoice-info {
+        flex-direction: column;
+        gap: 20px;
+      }
+      
+      .backup-buttons {
+        flex-direction: column;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+      }
+      
+      .header h1 {
+        font-size: 1.7rem;
+      }
+      
+      .tabs {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+      }
+      
+      .card {
+        padding: 20px;
+      }
+      
+      .invoice-modal-content {
+        padding: 20px;
+      }
+      
+      .transaction-modal-content {
+        padding: 20px;
+      }
+      
+      .filters {
+        gap: 10px;
+      }
+      
+      .filters button {
+        margin-top: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <i class="fas fa-wind"></i>
+        </div>
+        <h2>Rhevia Perfumes</h2>
+      </div>
+      <a href="#" class="active" data-tab="dashboard"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a>
+      <a href="#" data-tab="invoices"><i class="fas fa-file-invoice"></i> <span>Invoices</span></a>
+      <a href="#" data-tab="accounting"><i class="fas fa-calculator"></i> <span>Accounting</span></a>
+      <a href="#" data-tab="reports"><i class="fas fa-chart-pie"></i> <span>Monthly Reports</span></a>
+      <a href="#" data-tab="manual"><i class="fas fa-pen"></i> <span>Data Input</span></a>
+      
+      <!-- Add this to your sidebar -->
+<a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a>
+
+    </aside>
+
+    <main class="main">
+      <!-- Dashboard Tab -->
+      <div id="dashboard" class="tab-content active">
+        <div class="header">
+          <h1><i class="fas fa-tachometer-alt"></i> Dashboard Overview</h1>
+          <button class="btn btn-export" id="exportDashboardBtn"><i class="fas fa-file-export"></i> Export Data</button>
+        </div>
+        
+        <div class="summary">
+          <div class="summary-card">
+            <h3><i class="fas fa-money-bill-wave"></i> Total Income</h3>
+            <p class="income" id="dashboardIncome">৳0.00</p>
+          </div>
+          <div class="summary-card">
+            <h3><i class="fas fa-receipt"></i> Total Expenses</h3>
+            <p class="expense" id="dashboardExpenses">৳0.00</p>
+          </div>
+          <div class="summary-card">
+            <h3><i class="fas fa-chart-line"></i> Net Profit</h3>
+            <p id="dashboardProfit">৳0.00</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2><i class="fas fa-chart-line"></i> Financial Overview</h2>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Description</th>
+                  <th>Category</th>
+                  <th>Type</th>
+                  <th>Amount</th>
+                </tr>
+              </thead>
+              <tbody id="dashboardTransactions">
+                <tr>
+                  <td colspan="5" class="empty-state">
+                    <i class="fas fa-file-alt"></i>
+                    <h3>No Transactions Yet</h3>
+                    <p>Add transactions to see them appear here</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <!-- Backup Section -->
+        <div class="backup-section">
+          <h3><i class="fas fa-database"></i> Data Backup & Recovery</h3>
+          <p>Backup your data to prevent loss. You can also restore from a previous backup.</p>
+          <div class="backup-buttons">
+            <button id="backupBtn" class="btn btn-success"><i class="fas fa-save"></i> Backup Data</button>
+            <button id="restoreBtn" class="btn btn-primary"><i class="fas fa-history"></i> Restore Data</button>
+            <button id="resetBtn" class="btn btn-secondary"><i class="fas fa-redo"></i> Reset to Sample Data</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Invoices Tab -->
+      <div id="invoices" class="tab-content">
+        <div class="header">
+          <h1><i class="fas fa-file-invoice"></i> Invoices</h1>
+          <button class="btn btn-primary" id="newInvoiceBtn"><i class="fas fa-plus"></i> New Invoice</button>
+          <button class="btn btn-export" id="exportInvoicesBtn"><i class="fas fa-file-export"></i> Export</button>
+        </div>
+        
+        <div class="filters">
+          <div class="filter-group">
+            <label for="invoiceSearch">Search</label>
+            <input type="text" id="invoiceSearch" placeholder="Invoice no, email or phone">
+          </div>
+          <div class="filter-group">
+            <label for="invoiceStatus">Status</label>
+            <select id="invoiceStatus">
+              <option value="">All Statuses</option>
+              <option value="Paid">Paid</option>
+              <option value="Unpaid">Unpaid</option>
+              <option value="Overdue">Overdue</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="invoiceMonth">Month</label>
+            <select id="invoiceMonth">
+              <option value="">All Months</option>
+              <option value="2025-06">June 2025</option>
+              <option value="2025-05">May 2025</option>
+              <option value="2025-04">April 2025</option>
+            </select>
+          </div>
+          <button id="filterInvoicesBtn"><i class="fas fa-filter"></i> Apply Filters</button>
+        </div>
+        
+        <div class="table-container">
+          <table id="invoicesTable">
+            <thead>
+              <tr>
+                <th>Invoice ID</th>
+                <th>Client</th>
+                <th>Date</th>
+                <th>Amount</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="invoicesTableBody">
+              <tr>
+                <td colspan="5" class="empty-state">
+                  <i class="fas fa-file-invoice"></i>
+                  <h3>No Invoices Created</h3>
+                  <p>Create your first invoice to get started</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <!-- Accounting Tab -->
+      <div id="accounting" class="tab-content">
+        <div class="header">
+          <h1><i class="fas fa-calculator"></i> Accounting Overview</h1>
+          <button class="btn btn-primary" id="newTransactionBtn"><i class="fas fa-plus"></i> New Transaction</button>
+          <button class="btn btn-export" id="exportAccountingBtn"><i class="fas fa-file-export"></i> Export</button>
+        </div>
+        
+        <div class="summary">
+          <div class="summary-card">
+            <h3>Total Income</h3>
+            <p id="totalIncome">৳0.00</p>
+          </div>
+          <div class="summary-card">
+            <h3>Total Expenses</h3>
+            <p id="totalExpenses">৳0.00</p>
+          </div>
+          <div class="summary-card">
+            <h3>Net Profit</h3>
+            <p id="netProfit">৳0.00</p>
+          </div>
+        </div>
+        
+        <div class="filters">
+          <div class="filter-group">
+            <label for="fromDate">From Date</label>
+            <input type="date" id="fromDate">
+          </div>
+          <div class="filter-group">
+            <label for="toDate">To Date</label>
+            <input type="date" id="toDate">
+          </div>
+          <div class="filter-group">
+            <label for="categoryFilter">Category</label>
+            <select id="categoryFilter">
+              <option value="">All Categories</option>
+              <option value="Sales">Sales</option>
+              <option value="Operations">Operations</option>
+              <option value="Software">Software</option>
+              <option value="Payroll">Payroll</option>
+              <option value="Marketing">Marketing</option>
+              <option value="Production">Production</option>
+              <option value="Delivery">Delivery</option>
+            </select>
+          </div>
+          <button id="applyFilters"><i class="fas fa-filter"></i> Apply Filters</button>
+          <button id="resetFilters"><i class="fas fa-redo"></i> Reset</button>
+        </div>
+        
+        <div class="table-container">
+          <table id="transactionsTable">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Category</th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="transactionsTableBody">
+              <tr>
+                <td colspan="6" class="empty-state">
+                  <i class="fas fa-exchange-alt"></i>
+                  <h3>No Transactions Recorded</h3>
+                  <p>Add transactions to start tracking your finances</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <!-- Reports Tab -->
+      <div id="reports" class="tab-content">
+        <div class="header">
+          <h1><i class="fas fa-chart-pie"></i> Monthly Reports</h1>
+          <button class="btn btn-export" id="exportReportsBtn"><i class="fas fa-download"></i> Export Report</button>
+        </div>
+        
+        <div class="filters">
+          <div class="filter-group">
+            <label for="reportMonth">Select Month</label>
+            <select id="reportMonth">
+              <option value="2025-06">June 2025</option>
+              <option value="2025-05">May 2025</option>
+              <option value="2025-04">April 2025</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="summary">
+          <div class="summary-card">
+            <h3>Income</h3>
+            <p id="reportIncome">৳0.00</p>
+          </div>
+          <div class="summary-card">
+            <h3>Expenses</h3>
+            <p id="reportExpenses">৳0.00</p>
+          </div>
+          <div class="summary-card">
+            <h3>Profit</h3>
+            <p id="reportProfit">৳0.00</p>
+          </div>
+        </div>
+        
+        <div class="card">
+          <h2><i class="fas fa-chart-bar"></i> Financial Breakdown</h2>
+          <div class="table-container">
+            <table id="breakdownTable">
+              <thead>
+                <tr>
+                  <th>Category</th>
+                  <th>Type</th>
+                  <th>Amount</th>
+                </tr>
+              </thead>
+              <tbody id="breakdownTableBody">
+                <tr>
+                  <td colspan="3" class="empty-state">
+                    <i class="fas fa-chart-pie"></i>
+                    <h3>No Report Data</h3>
+                    <p>Add transactions to generate financial reports</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Manual Input Tab -->
+      <div id="manual" class="tab-content">
+        <div class="header">
+          <h1><i class="fas fa-pen"></i> Manual Accounting Input</h1>
+          <button id="exportManualBtn" class="btn btn-export"><i class="fas fa-file-export"></i> Export Data</button>
+        </div>
+        
+        <div class="tabs">
+          <div class="tab active" data-subtab="entry">New Entry</div>
+          <div class="tab" data-subtab="view">View Entries</div>
+        </div>
+        
+        <div id="entry" class="subtab-content active">
+          <div class="card">
+            <h2><i class="fas fa-edit"></i> New Entry Form</h2>
+            <form id="accountingForm">
+              <input type="hidden" id="entryId">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="date"><i class="fas fa-calendar"></i> Date</label>
+                  <input type="date" id="date" required>
+                </div>
+                
+                <div class="form-group">
+                  <label for="productName"><i class="fas fa-wind"></i> Perfume Name</label>
+                  <input type="text" id="productName" placeholder="e.g., Midnight Rose" required>
+                </div>
+                
+                <div class="form-group">
+                  <label for="makingStatus"><i class="fas fa-tasks"></i> Making Status</label>
+                  <select id="makingStatus" required>
+                    <option value="">Select Status</option>
+                    <option value="Completed">Completed</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Pending">Pending</option>
+                  </select>
+                </div>
+                
+                <div class="form-group">
+                  <label for="specialNote"><i class="fas fa-sticky-note"></i> Special Note</label>
+                  <textarea id="specialNote" placeholder="Any special instructions..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                  <label for="bottleSize"><i class="fas fa-weight"></i> Bottle Size (ML)</label>
+                  <input type="number" id="bottleSize" min="0" placeholder="e.g., 100" required>
+                </div>
+                
+                <div class="form-group">
+                  <label for="quantityMade"><i class="fas fa-boxes"></i> Quantity Made</label>
+                  <input type="number" id="quantityMade" min="0" placeholder="e.g., 50" required>
+                </div>
+                
+                <div class="form-group">
+                  <label for="customerName"><i class="fas fa-user"></i> Customer Name</label>
+                  <input type="text" id="customerName" placeholder="e.g., John Smith" required>
+                </div>
+                
+                <div class="form-group">
+                  <label for="phone"><i class="fas fa-phone"></i> Phone Number</label>
+                  <input type="tel" id="phone" placeholder="e.g., (123) 456-7890" required>
+                </div>
+                
+                <div class="form-group">
+                  <label for="email"><i class="fas fa-envelope"></i> Email</label>
+                  <input type="email" id="email" placeholder="e.g., customer@example.com">
+                </div>
+                
+                <div class="form-group">
+                  <label for="address"><i class="fas fa-map-marker-alt"></i> Address</label>
+                  <textarea id="address" placeholder="Full shipping address" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                  <label for="totalOrder"><i class="fas fa-shopping-cart"></i> Total Order Value</label>
+                  <input type="number" id="totalOrder" min="0" step="0.01" placeholder="e.g., 250.00" required>
+                </div>
+                
+                <div class="form-group">
+                  <label for="totalSpent"><i class="fas fa-money-bill"></i> Total Spent</label>
+                  <input type="number" id="totalSpent" min="0" step="0.01" placeholder="e.g., 150.00" required>
+                </div>
+                
+                <div class="form-group">
+                  <label for="deliveryCharge"><i class="fas fa-truck"></i> Delivery Charge</label>
+                  <input type="number" id="deliveryCharge" min="0" step="0.01" placeholder="e.g., 15.00" required>
+                </div>
+                
+                <div class="form-group">
+                  <label for="deliveryStatus"><i class="fas fa-shipping-fast"></i> Delivery Status</label>
+                  <select id="deliveryStatus" required>
+                    <option value="">Select Status</option>
+                    <option value="Processing">Processing</option>
+                    <option value="Shipped">Shipped</option>
+                    <option value="Delivered">Delivered</option>
+                  </select>
+                </div>
+                
+                <div class="form-group">
+                  <label for="paymentStatus"><i class="fas fa-credit-card"></i> Payment Status</label>
+                  <select id="paymentStatus" required>
+                    <option value="">Select Status</option>
+                    <option value="Paid">Paid</option>
+                    <option value="Unpaid">Unpaid</option>
+                    <option value="Overdue">Overdue</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div class="btn-group">
+                <button type="submit" id="submitBtn" class="btn btn-primary"><i class="fas fa-plus"></i> Add Entry</button>
+                <button type="button" id="updateBtn" class="btn btn-success" style="display: none;"><i class="fas fa-save"></i> Update Entry</button>
+                <button type="reset" id="resetBtn" class="btn btn-secondary"><i class="fas fa-redo"></i> Clear Form</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        
+        <div id="view" class="subtab-content">
+          <div class="card">
+            <div class="header">
+              <h2><i class="fas fa-list"></i> Accounting Entries</h2>
+              <div class="filters">
+                <input type="text" id="searchInput" placeholder="Search entries...">
+                <button id="searchBtn" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
+              </div>
+            </div>
+            
+            <div class="table-container">
+              <table id="entriesTable">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Customer</th>
+                    <th>Perfume</th>
+                    <th>Qty</th>
+                    <th>Size (ML)</th>
+                    <th>Order Value</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="entriesTableBody">
+                  <tr>
+                    <td colspan="8" class="empty-state">
+                      <i class="fas fa-database"></i>
+                      <h3>No Entries Recorded</h3>
+                      <p>Add your first entry to get started</p>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Entry Detail Modal -->
+  <div id="entryModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2><i class="fas fa-file-invoice"></i> Entry Details</h2>
+        <button class="close-modal">&times;</button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <!-- Details will be populated by JavaScript -->
+      </div>
+    </div>
+  </div>
+  
+  <!-- Invoice Modal -->
+  <div id="invoiceModal" class="modal">
+    <div class="invoice-modal-content">
+      <div class="invoice-header">
+        <div class="invoice-logo">
+          <i class="fas fa-wind"></i> Rhevia Perfumes
+        </div>
+        <div>
+          <h2>INVOICE</h2>
+          <p id="invoiceNumber">#INV001</p>
+          <p id="invoiceDate">Date: June 26, 2025</p>
+        </div>
+      </div>
+      
+      <div class="invoice-title">Tax Invoice</div>
+      
+      <div class="invoice-info">
+        <div class="invoice-info-section">
+          <h3>BILL TO</h3>
+          <p id="invoiceCustomer">Customer Name</p>
+          <p id="invoiceAddress">Customer Address</p>
+          <p id="invoicePhone">Phone: (123) 456-7890</p>
+          <p id="invoiceEmail">Email: customer@example.com</p>
+        </div>
+        
+        <div class="invoice-info-section">
+          <h3>SHIP TO</h3>
+          <p id="invoiceShipAddress">Same as Billing Address</p>
+          <p>Delivery Status: <span id="invoiceDeliveryStatus">Processing</span></p>
+          <p>Payment Status: <span id="invoicePaymentStatus">Pending</span></p>
+        </div>
+      </div>
+      
+      <table class="invoice-table">
+        <thead>
+          <tr>
+            <th>Perfume</th>
+            <th>Size (ML)</th>
+            <th>Qty</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody id="invoiceItems">
+          <tr>
+            <td>Midnight Rose</td>
+            <td>100</td>
+            <td>2</td>
+            <td>৳500.00</td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <div class="invoice-totals">
+        <div class="invoice-totals-row">
+          <span>Subtotal:</span>
+          <span id="invoiceSubtotal">৳500.00</span>
+        </div>
+        <div class="invoice-totals-row">
+          <span>Delivery Charge:</span>
+          <span id="invoiceDelivery">৳50.00</span>
+        </div>
+        <div class="invoice-totals-row">
+          <span>Tax (0%):</span>
+          <span>৳0.00</span>
+        </div>
+        <div class="invoice-totals-row total">
+          <span>Total:</span>
+          <span id="invoiceTotal">৳550.00</span>
+        </div>
+      </div>
+      
+      <div class="invoice-footer">
+        <p>Thank you for your business!</p>
+        <p>Payment is due within 15 days. Please make checks payable to Rhevia Perfumes.</p>
+        <p>If you have any questions about this invoice, please contact support@rhevia-perfumes.com</p>
+      </div>
+      
+      <div class="invoice-actions">
+        <button class="btn btn-primary" id="printInvoiceBtn"><i class="fas fa-print"></i> Print Invoice</button>
+        <button class="btn btn-success" id="markPaidBtn"><i class="fas fa-check"></i> Mark as Paid</button>
+        <button class="btn btn-export" id="downloadInvoiceBtn"><i class="fas fa-download"></i> Download PDF</button>
+        <button class="close-modal btn btn-secondary">Close</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Transaction Modal -->
+  <div id="transactionModal" class="modal">
+    <div class="transaction-modal-content">
+      <div class="modal-header">
+        <h2><i class="fas fa-plus"></i> New Transaction</h2>
+        <button class="close-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="transactionForm" class="transaction-form">
+          <div class="form-group">
+            <label for="transDate"><i class="fas fa-calendar"></i> Date</label>
+            <input type="date" id="transDate" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="transDescription"><i class="fas fa-align-left"></i> Description</label>
+            <input type="text" id="transDescription" placeholder="e.g., Office Supplies" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="transCategory"><i class="fas fa-tag"></i> Category</label>
+            <select id="transCategory" required>
+              <option value="">Select Category</option>
+              <option value="Sales">Sales</option>
+              <option value="Operations">Operations</option>
+              <option value="Software">Software</option>
+              <option value="Payroll">Payroll</option>
+              <option value="Marketing">Marketing</option>
+              <option value="Rent">Rent</option>
+              <option value="Utilities">Utilities</option>
+              <option value="Production">Production</option>
+              <option value="Delivery">Delivery</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="transType"><i class="fas fa-exchange-alt"></i> Type</label>
+            <select id="transType" required>
+              <option value="">Select Type</option>
+              <option value="Income">Income</option>
+              <option value="Expense">Expense</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="transAmount"><i class="fas fa-money-bill"></i> Amount (৳)</label>
+            <input type="number" id="transAmount" min="0" step="0.01" placeholder="e.g., 250.00" required>
+          </div>
+          
+          <div class="transaction-actions">
+            <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Add Transaction</button>
+            <button type="button" class="close-modal btn btn-secondary">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Toast notification container -->
+  <div id="toast" class="toast"></div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Database and data management
+      let entries = [];         // Stores all manual accounting entries
+      let transactions = [];    // Stores all financial transactions
+      let invoices = [];        // Stores all invoices
+      let nextId = 1;           // Counter for generating unique IDs
+      
+      // DOM Elements
+      const form = document.getElementById('accountingForm');
+      const submitBtn = document.getElementById('submitBtn');
+      const updateBtn = document.getElementById('updateBtn');
+      const resetBtn = document.getElementById('resetBtn');
+      const entriesTableBody = document.getElementById('entriesTableBody');
+      const dashboardTransactions = document.getElementById('dashboardTransactions');
+      const transactionsTableBody = document.getElementById('transactionsTableBody');
+      const invoicesTableBody = document.getElementById('invoicesTableBody');
+      const breakdownTableBody = document.getElementById('breakdownTableBody');
+      const searchInput = document.getElementById('searchInput');
+      const searchBtn = document.getElementById('searchBtn');
+      const viewTab = document.querySelector('[data-subtab="view"]');
+      const entryTab = document.querySelector('[data-subtab="entry"]');
+      const tabs = document.querySelectorAll('.tab');
+      const sidebarLinks = document.querySelectorAll('.sidebar a');
+      const entryIdField = document.getElementById('entryId');
+      const modal = document.getElementById('entryModal');
+      const invoiceModal = document.getElementById('invoiceModal');
+      const transactionModal = document.getElementById('transactionModal');
+      const closeModalBtns = document.querySelectorAll('.close-modal');
+      const modalBody = document.getElementById('modalBody');
+      const toast = document.getElementById('toast');
+      const newInvoiceBtn = document.getElementById('newInvoiceBtn');
+      const newTransactionBtn = document.getElementById('newTransactionBtn');
+      const filterInvoicesBtn = document.getElementById('filterInvoicesBtn');
+      const downloadInvoiceBtn = document.getElementById('downloadInvoiceBtn');
+      const transactionForm = document.getElementById('transactionForm');
+      const applyFiltersBtn = document.getElementById('applyFilters');
+      const resetFiltersBtn = document.getElementById('resetFilters');
+      const fromDateFilter = document.getElementById('fromDate');
+      const toDateFilter = document.getElementById('toDate');
+      const categoryFilter = document.getElementById('categoryFilter');
+      const backupBtn = document.getElementById('backupBtn');
+      const restoreBtn = document.getElementById('restoreBtn');
+      const resetDataBtn = document.getElementById('resetBtn');
+      
+      // Currency formatting function
+      const formatTaka = amount => `৳${parseFloat(amount).toFixed(2)}`;
+      
+      // Set today's date as default for form
+      document.getElementById('date').valueAsDate = new Date();
+      
+      // Initialize with saved data or sample data
+      loadData();
+      
+      // Show toast notification
+      function showToast(message, type = 'success') {
+        toast.textContent = message;
+        toast.className = `toast show ${type}`;
+        setTimeout(() => {
+          toast.className = 'toast';
+        }, 3000);
+      }
+      
+      // Save data to localStorage
+      function saveData() {
+        const data = {
+          entries,
+          transactions,
+          invoices,
+          nextId
+        };
+        localStorage.setItem('rheviaAccountingData', JSON.stringify(data));
+        showToast('Data saved successfully!');
+      }
+      
+      // Load data from localStorage
+      function loadData() {
+        const savedData = localStorage.getItem('rheviaAccountingData');
+        if (savedData) {
+          const data = JSON.parse(savedData);
+          entries = data.entries || [];
+          transactions = data.transactions || [];
+          invoices = data.invoices || [];
+          nextId = data.nextId || 1;
+          showToast('Data loaded successfully!');
+        } else {
+          initializeSampleData();
+          showToast('Using sample data', 'info');
+        }
+        
+        // Update all sections
+        updateDashboard();
+        renderInvoices();
+        renderTransactions();
+        updateReports();
+        renderEntries(entries);
+      }
+      
+      // Backup data to localStorage
+      backupBtn.addEventListener('click', function() {
+        saveData();
+      });
+      
+      // Restore data from localStorage
+      restoreBtn.addEventListener('click', function() {
+        loadData();
+      });
+      
+      // Reset to sample data
+      resetDataBtn.addEventListener('click', function() {
+        if (confirm('Are you sure you want to reset all data? This will replace your current data with sample data.')) {
+          localStorage.removeItem('rheviaAccountingData');
+          initializeSampleData();
+          showToast('Data reset to sample', 'info');
+        }
+      });
+      
+      // Initialize with sample data
+      function initializeSampleData() {
+        // Clear all data arrays
+        entries = [];
+        transactions = [];
+        invoices = [];
+        nextId = 1;
+        
+        // Add sample transactions
+        addSampleTransaction('2025-06-01', 'Office Rent', 'Rent', 'Expense', 500);
+        addSampleTransaction('2025-06-03', 'Perfume Sales', 'Sales', 'Income', 1200);
+        addSampleTransaction('2025-06-05', 'Supplier Payment', 'Operations', 'Expense', 350);
+        addSampleTransaction('2025-06-08', 'Online Sales', 'Sales', 'Income', 850);
+        addSampleTransaction('2025-06-10', 'Software Subscription', 'Software', 'Expense', 99);
+        addSampleTransaction('2025-06-15', 'Employee Salaries', 'Payroll', 'Expense', 2200);
+        addSampleTransaction('2025-06-20', 'Retail Sales', 'Sales', 'Income', 1750);
+        addSampleTransaction('2025-06-25', 'Marketing Campaign', 'Marketing', 'Expense', 450);
+        
+        // Save the sample data
+        saveData();
+      }
+      
+      function addSampleTransaction(date, description, category, type, amount) {
+        transactions.push({
+          id: nextId++,
+          date: date,
+          description: description,
+          category: category,
+          type: type,
+          amount: amount,
+          timestamp: new Date().toISOString()
+        });
+      }
+      
+      // Tab switching for manual input
+      tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+          const subtabId = this.getAttribute('data-subtab');
+          
+          // Remove active class from all sub-tabs
+          tabs.forEach(t => t.classList.remove('active'));
+          document.querySelectorAll('.subtab-content').forEach(tab => tab.classList.remove('active'));
+          
+          // Add active class to current sub-tab
+          this.classList.add('active');
+          document.getElementById(subtabId).classList.add('active');
+          
+          // If switching to View Entries, render the entries
+          if (subtabId === 'view') {
+            renderEntries(entries);
+          }
+        });
+      });
+      
+      // Sidebar navigation
+      sidebarLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          const tabId = this.getAttribute('data-tab');
+          
+          // Remove active class from all tabs
+          sidebarLinks.forEach(a => a.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+          
+          // Add active class to current tab
+          this.classList.add('active');
+          document.getElementById(tabId).classList.add('active');
+          
+          // Load data for the selected tab
+          if (tabId === 'dashboard') {
+            updateDashboard();
+          } else if (tabId === 'invoices') {
+            renderInvoices();
+          } else if (tabId === 'accounting') {
+            renderTransactions();
+          } else if (tabId === 'reports') {
+            updateReports();
+          } else if (tabId === 'manual') {
+            renderEntries(entries);
+          }
+        });
+      });
+      
+      // Form submission handler
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        addEntry();
+      });
+      
+      // Update button handler
+      updateBtn.addEventListener('click', function() {
+        updateEntry();
+      });
+      
+      // Reset form handler
+      resetBtn.addEventListener('click', function() {
+        resetForm();
+      });
+      
+      // Search functionality
+      searchBtn.addEventListener('click', function() {
+        searchEntries();
+      });
+      
+      searchInput.addEventListener('keyup', function(e) {
+        if (e.key === 'Enter') {
+          searchEntries();
+        }
+      });
+      
+      // Modal close buttons
+      closeModalBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+          modal.style.display = 'none';
+          invoiceModal.style.display = 'none';
+          transactionModal.style.display = 'none';
+        });
+      });
+      
+      // Close modal when clicking outside
+      window.addEventListener('click', function(e) {
+        if (e.target === modal || e.target === invoiceModal || e.target === transactionModal) {
+          modal.style.display = 'none';
+          invoiceModal.style.display = 'none';
+          transactionModal.style.display = 'none';
+        }
+      });
+      
+      // New Invoice button handler
+      newInvoiceBtn.addEventListener('click', function() {
+        // Switch to manual input tab
+        const manualTab = document.querySelector('.sidebar a[data-tab="manual"]');
+        manualTab.click();
+        
+        // Activate the entry form
+        document.querySelector('[data-subtab="entry"]').click();
+        
+        // Scroll to the form
+        document.getElementById('accountingForm').scrollIntoView({ behavior: 'smooth' });
+        
+        showToast('Please fill out the form to create a new invoice', 'info');
+      });
+      
+      // New Transaction button handler
+      newTransactionBtn.addEventListener('click', function() {
+        // Reset form and set today's date
+        transactionForm.reset();
+        document.getElementById('transDate').valueAsDate = new Date();
+        transactionModal.style.display = 'flex';
+      });
+      
+      // Transaction form submission
+      transactionForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        addNewTransaction();
+      });
+      
+      // Filter Invoices button handler
+      filterInvoicesBtn.addEventListener('click', function() {
+        filterInvoices();
+      });
+      
+      // Apply Accounting Filters button handler
+      applyFiltersBtn.addEventListener('click', function() {
+        filterTransactions();
+      });
+      
+      // Reset Accounting Filters button handler
+      resetFiltersBtn.addEventListener('click', function() {
+        fromDateFilter.value = '';
+        toDateFilter.value = '';
+        categoryFilter.value = '';
+        renderTransactions();
+        showToast('Filters reset successfully');
+      });
+      
+      // Download Invoice button handler
+      downloadInvoiceBtn.addEventListener('click', function() {
+        showToast('Invoice download started', 'info');
+        setTimeout(() => {
+          showToast('Invoice downloaded successfully');
+        }, 1500);
+      });
+      
+      // Export button handlers
+      document.getElementById('exportDashboardBtn').addEventListener('click', () => exportData('transactions', transactions));
+      document.getElementById('exportInvoicesBtn').addEventListener('click', () => exportData('invoices', invoices));
+      document.getElementById('exportAccountingBtn').addEventListener('click', () => exportData('transactions', transactions));
+      document.getElementById('exportReportsBtn').addEventListener('click', exportReportsData);
+      document.getElementById('exportManualBtn').addEventListener('click', () => exportData('entries', entries));
+      
+      // Export data as CSV
+      function exportData(type, data) {
+        if (data.length === 0) {
+          showToast(`No ${type} data to export`, 'error');
+          return;
+        }
+        
+        // Create CSV content
+        const headers = Object.keys(data[0]);
+        let csvContent = headers.join(',') + '\n';
+        
+        data.forEach(item => {
+          const row = headers.map(header => {
+            let value = item[header];
+            if (typeof value === 'object') {
+              value = JSON.stringify(value);
+            }
+            return `"${value}"`;
+          });
+          csvContent += row.join(',') + '\n';
+        });
+        
+        // Create and trigger download
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `${type}_${new Date().toISOString().slice(0, 10)}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        showToast(`${type} data exported successfully`);
+      }
+      
+      // Export reports data
+      function exportReportsData() {
+        const month = document.getElementById('reportMonth').value;
+        const monthTransactions = transactions.filter(t => t.date.startsWith(month.substring(0,7)));
+        
+        if (monthTransactions.length === 0) {
+          showToast('No report data to export for this month', 'error');
+          return;
+        }
+        
+        // Group transactions by category and type
+        const categories = {};
+        monthTransactions.forEach(transaction => {
+          const key = `${transaction.category}-${transaction.type}`;
+          if (!categories[key]) {
+            categories[key] = {
+              category: transaction.category,
+              type: transaction.type,
+              amount: 0
+            };
+          }
+          categories[key].amount += transaction.amount;
+        });
+        
+        const breakdownData = Object.values(categories);
+        exportData(`report_${month}`, breakdownData);
+      }
+      
+      // Calculate financial totals
+      function calculateTotals() {
+        let income = 0;
+        let expenses = 0;
+        
+        transactions.forEach(transaction => {
+          if (transaction.type === 'Income') {
+            income += transaction.amount;
+          } else {
+            expenses += transaction.amount;
+          }
+        });
+        
+        return {
+          income,
+          expenses,
+          profit: income - expenses
+        };
+      }
+      
+      // Add new entry
+      function addEntry() {
+        const entry = {
+          id: nextId++,
+          date: document.getElementById('date').value,
+          productName: document.getElementById('productName').value,
+          makingStatus: document.getElementById('makingStatus').value,
+          specialNote: document.getElementById('specialNote').value,
+          bottleSize: parseInt(document.getElementById('bottleSize').value),
+          quantityMade: parseInt(document.getElementById('quantityMade').value),
+          customerName: document.getElementById('customerName').value,
+          phone: document.getElementById('phone').value,
+          email: document.getElementById('email').value || 'N/A',
+          address: document.getElementById('address').value,
+          totalOrder: parseFloat(document.getElementById('totalOrder').value),
+          totalSpent: parseFloat(document.getElementById('totalSpent').value),
+          deliveryCharge: parseFloat(document.getElementById('deliveryCharge').value),
+          deliveryStatus: document.getElementById('deliveryStatus').value,
+          paymentStatus: document.getElementById('paymentStatus').value,
+          timestamp: new Date().toISOString()
+        };
+        
+        // Add to entries array
+        entries.push(entry);
+        
+        // Create transactions
+        transactions.push({
+          id: nextId++,
+          date: entry.date,
+          description: `${entry.productName} Sale`,
+          category: "Sales",
+          type: "Income",
+          amount: entry.totalOrder
+        });
+        
+        transactions.push({
+          id: nextId++,
+          date: entry.date,
+          description: `${entry.productName} Production`,
+          category: "Production",
+          type: "Expense",
+          amount: entry.totalSpent
+        });
+        
+        transactions.push({
+          id: nextId++,
+          date: entry.date,
+          description: `${entry.productName} Delivery`,
+          category: "Delivery",
+          type: "Expense",
+          amount: entry.deliveryCharge
+        });
+        
+        // Create invoice
+        const invoice = {
+          id: nextId++,
+          client: entry.customerName,
+          date: entry.date,
+          amount: entry.totalOrder,
+          status: entry.paymentStatus,
+          deliveryStatus: entry.deliveryStatus,
+          entryId: entry.id,
+          deliveryCharge: entry.deliveryCharge,
+          email: entry.email,
+          phone: entry.phone,
+          address: entry.address
+        };
+        
+        invoices.push(invoice);
+        
+        // Save data to localStorage
+        saveData();
+        
+        // Show success message
+        showToast(`Entry #${entry.id} added successfully`);
+        
+        // Reset form
+        resetForm();
+        
+        // Update all sections
+        updateDashboard();
+        renderInvoices();
+        renderTransactions();
+        updateReports();
+        
+        // Switch to View Entries tab
+        viewTab.click();
+      }
+      
+      // Function to add new standalone transaction
+      function addNewTransaction() {
+        const transaction = {
+          id: nextId++,
+          date: document.getElementById('transDate').value,
+          description: document.getElementById('transDescription').value,
+          category: document.getElementById('transCategory').value,
+          type: document.getElementById('transType').value,
+          amount: parseFloat(document.getElementById('transAmount').value),
+          timestamp: new Date().toISOString()
+        };
+        
+        // Add to transactions array
+        transactions.push(transaction);
+        
+        // Save data to localStorage
+        saveData();
+        
+        // Show success message
+        showToast('Transaction added successfully');
+        
+        // Close modal
+        transactionModal.style.display = 'none';
+        
+        // Update relevant sections
+        renderTransactions();
+        updateDashboard();
+        updateAccountingSummary();
+        updateReports();
+      }
+      
+      // Function to filter transactions
+      function filterTransactions() {
+        const fromDate = fromDateFilter.value;
+        const toDate = toDateFilter.value;
+        const category = categoryFilter.value;
+        
+        let filteredTransactions = transactions;
+        
+        // Apply date filters
+        if (fromDate) {
+          filteredTransactions = filteredTransactions.filter(t => t.date >= fromDate);
+        }
+        
+        if (toDate) {
+          filteredTransactions = filteredTransactions.filter(t => t.date <= toDate);
+        }
+        
+        // Apply category filter
+        if (category) {
+          filteredTransactions = filteredTransactions.filter(t => t.category === category);
+        }
+        
+        // Render filtered transactions
+        renderTransactions(filteredTransactions);
+        
+        showToast(`Showing ${filteredTransactions.length} filtered transactions`);
+      }
+      
+      // Function to delete a transaction
+      window.deleteTransaction = function(id) {
+        if (confirm('Are you sure you want to delete this transaction?')) {
+          const initialLength = transactions.length;
+          transactions = transactions.filter(transaction => transaction.id !== id);
+          
+          if (transactions.length < initialLength) {
+            // Save data to localStorage
+            saveData();
+            
+            showToast('Transaction deleted successfully');
+            renderTransactions();
+            updateDashboard();
+            updateAccountingSummary();
+            updateReports();
+          } else {
+            showToast('Transaction not found', 'error');
+          }
+        }
+      };
+      
+      // Update existing entry
+      function updateEntry() {
+        const id = parseInt(entryIdField.value);
+        const index = entries.findIndex(entry => entry.id === id);
+        
+        if (index === -1) {
+          showToast('Entry not found', 'error');
+          return;
+        }
+        
+        const entry = {
+          id: id,
+          date: document.getElementById('date').value,
+          productName: document.getElementById('productName').value,
+          makingStatus: document.getElementById('makingStatus').value,
+          specialNote: document.getElementById('specialNote').value,
+          bottleSize: parseInt(document.getElementById('bottleSize').value),
+          quantityMade: parseInt(document.getElementById('quantityMade').value),
+          customerName: document.getElementById('customerName').value,
+          phone: document.getElementById('phone').value,
+          email: document.getElementById('email').value || 'N/A',
+          address: document.getElementById('address').value,
+          totalOrder: parseFloat(document.getElementById('totalOrder').value),
+          totalSpent: parseFloat(document.getElementById('totalSpent').value),
+          deliveryCharge: parseFloat(document.getElementById('deliveryCharge').value),
+          deliveryStatus: document.getElementById('deliveryStatus').value,
+          paymentStatus: document.getElementById('paymentStatus').value,
+          timestamp: new Date().toISOString()
+        };
+        
+        // Update the entry
+        entries[index] = entry;
+        
+        // Update the invoice
+        const invoiceIndex = invoices.findIndex(inv => inv.entryId === id);
+        if (invoiceIndex !== -1) {
+          invoices[invoiceIndex] = {
+            ...invoices[invoiceIndex],
+            client: entry.customerName,
+            amount: entry.totalOrder,
+            status: entry.paymentStatus,
+            deliveryStatus: entry.deliveryStatus,
+            deliveryCharge: entry.deliveryCharge,
+            email: entry.email,
+            phone: entry.phone,
+            address: entry.address
+          };
+        }
+        
+        // Save data to localStorage
+        saveData();
+        
+        // Show success message
+        showToast(`Entry #${entry.id} updated successfully`);
+        
+        // Reset form
+        resetForm();
+        
+        // Update all sections
+        renderEntries(entries);
+        updateDashboard();
+        renderInvoices();
+        renderTransactions();
+        updateReports();
+        
+        // Switch to View Entries tab
+        viewTab.click();
+      }
+      
+      // Reset form to add mode
+      function resetForm() {
+        form.reset();
+        document.getElementById('date').valueAsDate = new Date();
+        submitBtn.style.display = 'flex';
+        updateBtn.style.display = 'none';
+        entryIdField.value = '';
+      }
+      
+      // Search entries
+      function searchEntries() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        if (!searchTerm) {
+          renderEntries(entries);
+          return;
+        }
+        
+        const filteredEntries = entries.filter(entry => 
+          entry.customerName.toLowerCase().includes(searchTerm) ||
+          entry.productName.toLowerCase().includes(searchTerm) ||
+          (entry.email && entry.email.toLowerCase().includes(searchTerm)) ||
+          (entry.phone && entry.phone.includes(searchTerm))
+        );
+        
+        renderEntries(filteredEntries);
+      }
+      
+      // Render entries to table
+      function renderEntries(entriesToRender) {
+        entriesTableBody.innerHTML = '';
+        
+        if (entriesToRender.length === 0) {
+          entriesTableBody.innerHTML = `
+            <tr>
+              <td colspan="8" class="empty-state">
+                <i class="fas fa-search"></i>
+                <h3>No Matching Entries</h3>
+                <p>Try a different search term</p>
+              </td>
+            </tr>
+          `;
+          return;
+        }
+        
+        entriesToRender.forEach(entry => {
+          const paymentStatusClass = 
+            entry.paymentStatus === 'Paid' ? 'status-paid' :
+            entry.paymentStatus === 'Pending' ? 'status-pending' : 'status-overdue';
+            
+          const deliveryStatusClass = 
+            entry.deliveryStatus === 'Delivered' ? 'status-delivered' :
+            entry.deliveryStatus === 'Shipped' ? 'status-processing' : 'status-pending';
+          
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${entry.date}</td>
+            <td>${entry.customerName}</td>
+            <td>${entry.productName}</td>
+            <td>${entry.quantityMade}</td>
+            <td>${entry.bottleSize}ml</td>
+            <td class="taka">${formatTaka(entry.totalOrder)}</td>
+            <td>
+              <span class="status-badge ${paymentStatusClass}">${entry.paymentStatus}</span>
+              <span class="status-badge ${deliveryStatusClass}">${entry.deliveryStatus}</span>
+            </td>
+            <td>
+              <button class="action-btn view-btn" onclick="viewEntry(${entry.id})"><i class="fas fa-eye"></i></button>
+              <button class="action-btn edit-btn" onclick="editEntry(${entry.id})"><i class="fas fa-edit"></i></button>
+              <button class="action-btn delete-btn" onclick="deleteEntry(${entry.id})"><i class="fas fa-trash"></i></button>
+            </td>
+          `;
+          entriesTableBody.appendChild(row);
+        });
+      }
+      
+      // View entry details
+      window.viewEntry = function(id) {
+        const entry = entries.find(e => e.id === id);
+        if (!entry) {
+          showToast('Entry not found', 'error');
+          return;
+        }
+        
+        modalBody.innerHTML = `
+          <div class="detail-group">
+            <h3><i class="fas fa-calendar"></i> Date</h3>
+            <p>${entry.date}</p>
+          </div>
+          
+          <div class="detail-group">
+            <h3><i class="fas fa-user"></i> Customer Name</h3>
+            <p>${entry.customerName}</p>
+          </div>
+          
+          <div class="detail-group">
+            <h3><i class="fas fa-phone"></i> Phone</h3>
+            <p>${entry.phone}</p>
+          </div>
+          
+          <div class="detail-group">
+            <h3><i class="fas fa-envelope"></i> Email</h3>
+            <p>${entry.email || 'N/A'}</p>
+          </div>
+          
+          <div class="detail-group">
+            <h3><i class="fas fa-map-marker-alt"></i> Address</h3>
+            <p>${entry.address}</p>
+          </div>
+          
+          <div class="detail-group">
+            <h3><i class="fas fa-wind"></i> Perfume</h3>
+            <p>${entry.productName}</p>
+          </div>
+          
+          <div class="detail-group">
+            <h3><i class="fas fa-weight"></i> Bottle Size</h3>
+            <p>${entry.bottleSize}ml</p>
+          </div>
+          
+          <div class="detail-group">
+            <h3><i class="fas fa-boxes"></i> Quantity Made</h3>
+            <p>${entry.quantityMade}</p>
+          </div>
+          
+          <div class="detail-group">
+            <h3><i class="fas fa-tasks"></i> Making Status</h3>
+            <p>${entry.makingStatus}</p>
+          </div>
+          
+          <div class="detail-group">
+            <h3><i class="fas fa-shopping-cart"></i> Total Order Value</h3>
+            <p class="taka">${formatTaka(entry.totalOrder)}</p>
+          </div>
+          
+          <div class="detail-group">
+            <h3><i class="fas fa-money-bill"></i> Total Spent</h3>
+            <p class="taka">${formatTaka(entry.totalSpent)}</p>
+          </div>
+          
+          <div class="detail-group">
+            <h3><i class="fas fa-truck"></i> Delivery Charge</h3>
+            <p class="taka">${formatTaka(entry.deliveryCharge)}</p>
+          </div>
+          
+          <div class="detail-group">
+            <h3><i class="fas fa-shipping-fast"></i> Delivery Status</h3>
+            <p>${entry.deliveryStatus}</p>
+          </div>
+          
+          <div class="detail-group">
+            <h3><i class="fas fa-credit-card"></i> Payment Status</h3>
+            <p>${entry.paymentStatus}</p>
+          </div>
+          
+          <div class="detail-group">
+            <h3><i class="fas fa-sticky-note"></i> Special Note</h3>
+            <p>${entry.specialNote || 'None'}</p>
+          </div>
+        `;
+        
+        modal.style.display = 'flex';
+      };
+      
+      // Edit entry
+      window.editEntry = function(id) {
+        const entry = entries.find(e => e.id === id);
+        if (!entry) {
+          showToast('Entry not found', 'error');
+          return;
+        }
+        
+        // Populate form with entry data
+        document.getElementById('date').value = entry.date;
+        document.getElementById('productName').value = entry.productName;
+        document.getElementById('makingStatus').value = entry.makingStatus;
+        document.getElementById('specialNote').value = entry.specialNote || '';
+        document.getElementById('bottleSize').value = entry.bottleSize;
+        document.getElementById('quantityMade').value = entry.quantityMade;
+        document.getElementById('customerName').value = entry.customerName;
+        document.getElementById('phone').value = entry.phone;
+        document.getElementById('email').value = entry.email || '';
+        document.getElementById('address').value = entry.address;
+        document.getElementById('totalOrder').value = entry.totalOrder;
+        document.getElementById('totalSpent').value = entry.totalSpent;
+        document.getElementById('deliveryCharge').value = entry.deliveryCharge;
+        document.getElementById('deliveryStatus').value = entry.deliveryStatus;
+        document.getElementById('paymentStatus').value = entry.paymentStatus;
+        
+        // Set entry ID
+        entryIdField.value = entry.id;
+        
+        // Show update button, hide submit button
+        submitBtn.style.display = 'none';
+        updateBtn.style.display = 'flex';
+        
+        // Switch to New Entry tab
+        entryTab.click();
+        
+        // Scroll to top
+        window.scrollTo(0, 0);
+      };
+      
+      // Delete entry
+      window.deleteEntry = function(id) {
+        if (confirm('Are you sure you want to delete this entry?')) {
+          const initialLength = entries.length;
+          entries = entries.filter(entry => entry.id !== id);
+          
+          // Remove associated invoice
+          invoices = invoices.filter(invoice => invoice.entryId !== id);
+          
+          if (entries.length < initialLength) {
+            // Save data to localStorage
+            saveData();
+            
+            showToast('Entry deleted successfully');
+            renderEntries(entries);
+            renderInvoices();
+          } else {
+            showToast('Entry not found', 'error');
+          }
+        }
+      };
+      
+      // Render invoices
+      function renderInvoices() {
+        invoicesTableBody.innerHTML = '';
+        
+        if (invoices.length === 0) {
+          invoicesTableBody.innerHTML = `
+            <tr>
+              <td colspan="5" class="empty-state">
+                <i class="fas fa-file-invoice"></i>
+                <h3>No Invoices Created</h3>
+                <p>Create your first invoice to get started</p>
+              </td>
+            </tr>
+          `;
+          return;
+        }
+        
+        invoices.forEach(invoice => {
+          const row = document.createElement('tr');
+          const statusClass = invoice.status.toLowerCase();
+          row.innerHTML = `
+            <td>#INV${String(invoice.id).padStart(5, '0')}</td>
+            <td>${invoice.client}</td>
+            <td>${invoice.date}</td>
+            <td class="taka">${formatTaka(invoice.amount)}</td>
+            <td><span class="badge ${statusClass}">${invoice.status}</span></td>
+          `;
+          
+          // Add click event to show invoice details
+          row.addEventListener('click', () => {
+            showInvoice(invoice);
+          });
+          
+          invoicesTableBody.appendChild(row);
+        });
+      }
+      
+      // Show invoice details
+      function showInvoice(invoice) {
+        // Find the associated entry
+        const entry = entries.find(e => e.id === invoice.entryId);
+        
+        if (entry) {
+          // Populate invoice template
+          document.getElementById('invoiceNumber').textContent = `#INV${String(invoice.id).padStart(5, '0')}`;
+          document.getElementById('invoiceDate').textContent = `Date: ${new Date(invoice.date).toLocaleDateString()}`;
+          document.getElementById('invoiceCustomer').textContent = invoice.client;
+          document.getElementById('invoiceAddress').textContent = invoice.address;
+          document.getElementById('invoicePhone').textContent = `Phone: ${invoice.phone}`;
+          document.getElementById('invoiceEmail').textContent = `Email: ${invoice.email}`;
+          document.getElementById('invoiceShipAddress').textContent = invoice.address;
+          document.getElementById('invoiceDeliveryStatus').textContent = invoice.deliveryStatus;
+          document.getElementById('invoicePaymentStatus').textContent = invoice.status;
+          
+          // Populate items
+          const invoiceItems = document.getElementById('invoiceItems');
+          invoiceItems.innerHTML = `
+            <tr>
+              <td>${entry.productName}</td>
+              <td>${entry.bottleSize}</td>
+              <td>${entry.quantityMade}</td>
+              <td class="taka">${formatTaka(entry.totalOrder)}</td>
+            </tr>
+          `;
+          
+          // Calculate totals
+          document.getElementById('invoiceSubtotal').textContent = formatTaka(entry.totalOrder);
+          document.getElementById('invoiceDelivery').textContent = formatTaka(invoice.deliveryCharge);
+          document.getElementById('invoiceTotal').textContent = formatTaka(entry.totalOrder + invoice.deliveryCharge);
+          
+          // Print button handler
+          document.getElementById('printInvoiceBtn').addEventListener('click', function() {
+            window.print();
+          });
+          
+          // Mark as paid button handler
+          document.getElementById('markPaidBtn').addEventListener('click', function() {
+            invoice.status = 'Paid';
+            if (entry) {
+              entry.paymentStatus = 'Paid';
+            }
+            
+            // Save data to localStorage
+            saveData();
+            
+            renderInvoices();
+            invoiceModal.style.display = 'none';
+            showToast('Invoice marked as paid');
+          });
+          
+          // Show invoice modal
+          invoiceModal.style.display = 'flex';
+        } else {
+          showToast('Associated entry not found', 'error');
+        }
+      }
+      
+      // Filter invoices
+      function filterInvoices() {
+        const searchTerm = document.getElementById('invoiceSearch').value.toLowerCase();
+        const statusFilter = document.getElementById('invoiceStatus').value;
+        const monthFilter = document.getElementById('invoiceMonth').value;
+        
+        const filteredInvoices = invoices.filter(invoice => {
+          const invText = `#INV${String(invoice.id).padStart(5, '0')}`.toLowerCase();
+          const matchesSearch = 
+            invText.includes(searchTerm) ||
+            String(invoice.id).includes(searchTerm) ||
+            (invoice.client && invoice.client.toLowerCase().includes(searchTerm)) ||
+            (invoice.email && invoice.email.toLowerCase().includes(searchTerm)) ||
+            (invoice.phone && invoice.phone.includes(searchTerm));
+          
+          const matchesStatus = statusFilter === '' || invoice.status === statusFilter;
+          
+          let matchesMonth = true;
+          if (monthFilter !== '') {
+            matchesMonth = invoice.date.startsWith(monthFilter);
+          }
+          
+          return matchesSearch && matchesStatus && matchesMonth;
+        });
+        
+        renderFilteredInvoices(filteredInvoices);
+      }
+      
+      // Render filtered invoices
+      function renderFilteredInvoices(filteredInvoices) {
+        invoicesTableBody.innerHTML = '';
+        
+        if (filteredInvoices.length === 0) {
+          invoicesTableBody.innerHTML = `
+            <tr>
+              <td colspan="5" class="empty-state">
+                <i class="fas fa-search"></i>
+                <h3>No Matching Invoices</h3>
+                <p>Try different filter criteria</p>
+              </td>
+            </tr>
+          `;
+          return;
+        }
+        
+        filteredInvoices.forEach(invoice => {
+          const row = document.createElement('tr');
+          const statusClass = invoice.status.toLowerCase();
+          row.innerHTML = `
+            <td>#INV${String(invoice.id).padStart(5, '0')}</td>
+            <td>${invoice.client}</td>
+            <td>${invoice.date}</td>
+            <td class="taka">${formatTaka(invoice.amount)}</td>
+            <td><span class="badge ${statusClass}">${invoice.status}</span></td>
+          `;
+          
+          // Add click event to show invoice details
+          row.addEventListener('click', () => {
+            showInvoice(invoice);
+          });
+          
+          invoicesTableBody.appendChild(row);
+        });
+      }
+      
+      // Render transactions
+      function renderTransactions(transactionsToRender = transactions) {
+        transactionsTableBody.innerHTML = '';
+        
+        if (transactionsToRender.length === 0) {
+          transactionsTableBody.innerHTML = `
+            <tr>
+              <td colspan="6" class="empty-state">
+                <i class="fas fa-exchange-alt"></i>
+                <h3>No Transactions Found</h3>
+                <p>Try different filter criteria</p>
+              </td>
+            </tr>
+          `;
+          return;
+        }
+        
+        transactionsToRender.forEach(transaction => {
+          const row = document.createElement('tr');
+          const typeClass = transaction.type === 'Income' ? 'income' : 'expense';
+          row.innerHTML = `
+            <td>${transaction.date}</td>
+            <td>${transaction.description}</td>
+            <td>${transaction.category}</td>
+            <td class="${typeClass}">${transaction.type}</td>
+            <td class="taka">${formatTaka(transaction.amount)}</td>
+            <td>
+              <button class="action-btn delete-btn" onclick="deleteTransaction(${transaction.id})">
+                <i class="fas fa-trash"></i>
+              </button>
+            </td>
+          `;
+          transactionsTableBody.appendChild(row);
+        });
+        
+        // Update accounting summary
+        updateAccountingSummary();
+      }
+      
+      // Update accounting summary
+      function updateAccountingSummary() {
+        const totals = calculateTotals();
+        
+        document.getElementById('totalIncome').textContent = formatTaka(totals.income);
+        document.getElementById('totalExpenses').textContent = formatTaka(totals.expenses);
+        document.getElementById('netProfit').textContent = formatTaka(totals.profit);
+      }
+      
+      // Update dashboard
+      function updateDashboard() {
+        const totals = calculateTotals();
+        
+        // Update dashboard summary
+        document.getElementById('dashboardIncome').textContent = formatTaka(totals.income);
+        document.getElementById('dashboardExpenses').textContent = formatTaka(totals.expenses);
+        document.getElementById('dashboardProfit').textContent = formatTaka(totals.profit);
+        
+        // Update transactions table
+        renderTransactionsTable(dashboardTransactions, transactions.slice(0, 5));
+      }
+      
+      // Render transactions to a specific table
+      function renderTransactionsTable(tableElement, transactionsToShow) {
+        tableElement.innerHTML = '';
+        
+        if (transactionsToShow.length === 0) {
+          tableElement.innerHTML = `
+            <tr>
+              <td colspan="5" class="empty-state">
+                <i class="fas fa-file-alt"></i>
+                <h3>No Transactions Yet</h3>
+                <p>Add transactions to see them appear here</p>
+              </td>
+            </tr>
+          `;
+          return;
+        }
+        
+        transactionsToShow.forEach(transaction => {
+          const row = document.createElement('tr');
+          const typeClass = transaction.type === 'Income' ? 'income' : 'expense';
+          row.innerHTML = `
+            <td>${transaction.date}</td>
+            <td>${transaction.description}</td>
+            <td>${transaction.category}</td>
+            <td class="${typeClass}">${transaction.type}</td>
+            <td class="taka">${formatTaka(transaction.amount)}</td>
+          `;
+          tableElement.appendChild(row);
+        });
+      }
+      
+      // Update reports
+      function updateReports() {
+        // Calculate monthly totals
+        const month = document.getElementById('reportMonth').value;
+        const monthTransactions = transactions.filter(t => t.date.startsWith(month.substring(0,7)));
+        
+        let income = 0;
+        let expenses = 0;
+        
+        monthTransactions.forEach(transaction => {
+          if (transaction.type === 'Income') {
+            income += transaction.amount;
+          } else {
+            expenses += transaction.amount;
+          }
+        });
+        
+        const profit = income - expenses;
+        
+        // Update report summary
+        document.getElementById('reportIncome').textContent = formatTaka(income);
+        document.getElementById('reportExpenses').textContent = formatTaka(expenses);
+        document.getElementById('reportProfit').textContent = formatTaka(profit);
+        
+        // Update breakdown table
+        renderBreakdownTable(monthTransactions);
+      }
+      
+      // Render breakdown table
+      function renderBreakdownTable(transactionsArray) {
+        breakdownTableBody.innerHTML = '';
+        
+        if (transactionsArray.length === 0) {
+          breakdownTableBody.innerHTML = `
+            <tr>
+              <td colspan="3" class="empty-state">
+                <i class="fas fa-chart-pie"></i>
+                <h3>No Report Data</h3>
+                <p>Add transactions to generate financial reports</p>
+              </td>
+            </tr>
+          `;
+          return;
+        }
+        
+        // Group by category and type
+        const categories = {};
+        
+        transactionsArray.forEach(transaction => {
+          const key = `${transaction.category}-${transaction.type}`;
+          if (!categories[key]) {
+            categories[key] = {
+              category: transaction.category,
+              type: transaction.type,
+              amount: 0
+            };
+          }
+          categories[key].amount += transaction.amount;
+        });
+        
+        // Add rows to table
+        Object.values(categories).forEach(item => {
+          const row = document.createElement('tr');
+          const typeClass = item.type === 'Income' ? 'income' : 'expense';
+          row.innerHTML = `
+            <td>${item.category}</td>
+            <td class="${typeClass}">${item.type}</td>
+            <td class="taka">${formatTaka(item.amount)}</td>
+          `;
+          breakdownTableBody.appendChild(row);
+        });
+      }
+    });
+  </script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // ... existing code ...
+
+  // Add logout handler here
+  document.getElementById('logoutBtn').addEventListener('click', function() {
+    sessionStorage.removeItem('isAuthenticated');
+    sessionStorage.removeItem('user');
+    window.location.href = "login.html";
+  });
+
+  // ... rest of your existing JavaScript ...
+});
+</script>
+
+</body>
+</html>
